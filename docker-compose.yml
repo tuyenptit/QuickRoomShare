@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  quickroom-share:
+    build: .
+    container_name: quickroom-share
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - DATABASE_PATH=/app/data/app.db
+      - UPLOAD_DIR=/app/uploads
+      - FILE_TTL_HOURS=12
+      - MAX_FILE_SIZE_MB=200
+    volumes:
+      - ./data:/app/data
+      - ./uploads:/app/uploads
+    deploy:
+      resources:
+        limits:
+          cpus: '1.5'
+          memory: 1024M

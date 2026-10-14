@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QuickRoom Share - Chia sẻ nhanh trong phòng họp</title>
+    <meta name="description" content="Nền tảng chia sẻ tài liệu, ghi chú và trình chiếu ảnh nhanh trong phòng họp không cần đăng nhập" />
+    <meta property="og:title" content="QuickRoom Share - Chia sẻ nhanh trong phòng họp" />
+    <meta property="og:description" content="Nền tảng chia sẻ tài liệu, ghi chú và trình chiếu ảnh nhanh trong phòng họp không cần đăng nhập" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script>
+      (function() {
+        try {
+          var origFetch = window.fetch;
+          var customFetch = origFetch ? origFetch.bind(window) : null;
+          Object.defineProperty(window, 'fetch', {
+            get: function() {
+              return customFetch;
+            },
+            set: function(fn) {
+              customFetch = fn;
+            },
+            configurable: true,
+            enumerable: true
+          });
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body class="bg-neutral-50 text-neutral-900 antialiased selection:bg-indigo-500 selection:text-white transition-colors duration-200">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

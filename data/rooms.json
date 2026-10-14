@@ -1,0 +1,10 @@
+{
+  "testroom": {
+    "id": "testroom",
+    "text": "",
+    "createdAt": 1791946403927,
+    "updatedAt": 1791946437882,
+    "ttlHours": 24,
+    "files": []
+  }
+}

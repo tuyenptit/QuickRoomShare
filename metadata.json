@@ -1,0 +1,6 @@
+{
+  "name": "QuickRoom Share",
+  "description": "Nền tảng chia sẻ tài liệu, ghi chú và trình chiếu ảnh nhanh trong phòng họp không cần đăng nhập",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
