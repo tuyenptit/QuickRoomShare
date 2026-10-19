@@ -11,10 +11,12 @@ export interface RoomFile {
 export interface RoomDetails {
   id: string;
   hasPassword: boolean;
+  isProtected?: boolean;
   isLocked: boolean;
   text: string;
   files: RoomFile[];
   ttlHours: number;
+  expiresAt?: number | null;
   createdAt: number;
   updatedAt: number;
 }

@@ -52,30 +52,38 @@ export const RecentRooms: React.FC<RecentRoomsProps> = ({
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
+          'x-room-password': password.trim(),
         },
         body: JSON.stringify({
           password: password.trim(),
         }),
       });
 
-      const data = await res.json().catch(() => ({}));
+      // Kiểm tra xem phản hồi có phải là JSON không
+      const contentType = res.headers.get('content-type');
+      if (contentType && contentType.indexOf('application/json') !== -1) {
+        const data = await res.json();
 
-      // Nếu API trả về mã lỗi 401 / 403 hoặc thất bại
-      if (!res.ok || data.success === false) {
-        setError(data.error || data.message || 'Mật khẩu phòng không đúng!');
+        // Nếu API trả về mã lỗi 401 hoặc thất bại
+        if (!res.ok || data.success === false) {
+          setError(data.error || data.message || 'Mật khẩu không đúng!');
+          setIsDeleting(false);
+          return;
+        }
+
+        // Xóa thành công trên Server (HTTP 200)
+        clearStoredPassword(deletingRoom.id);
+        onRemoveRecentRoom(deletingRoom.id);
+        setDeletingRoom(null);
+        setPassword('');
         setIsDeleting(false);
-        return;
+      } else {
+        // Xử lý nếu server trả về HTML hoặc phản hồi không xác định
+        setError('Lỗi máy chủ: Không thể nhận diện phản hồi.');
+        setIsDeleting(false);
       }
-
-      // Xóa thành công trên Server (HTTP 200)
-      // Lúc này MỚI xóa ID phòng khỏi localStorage và cập nhật danh sách hiển thị
-      clearStoredPassword(deletingRoom.id);
-      onRemoveRecentRoom(deletingRoom.id);
-      setDeletingRoom(null);
-      setPassword('');
-      setIsDeleting(false);
     } catch (err: any) {
-      setError(err.message || 'Mật khẩu phòng không đúng!');
+      setError('Lỗi kết nối đến máy chủ.');
       setIsDeleting(false);
     }
   };

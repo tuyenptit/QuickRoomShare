@@ -1,15 +1,15 @@
 # Stage 1: Build frontend assets
-FROM node:20-alpine AS builder
+FROM mirror.gcr.io/library/node:20-alpine AS builder
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm ci
+RUN npm install --legacy-peer-deps
 
 COPY . .
 RUN npm run build
 
-# Stage 2: Minimal Production Runner
-FROM node:20-alpine AS runner
+# Stage 2: Production Runner
+FROM mirror.gcr.io/library/node:20-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
@@ -19,9 +19,9 @@ ENV UPLOAD_DIR=/app/uploads
 ENV FILE_TTL_HOURS=12
 ENV MAX_FILE_SIZE_MB=200
 
-# Install production dependencies only
+# Install full dependencies with tsx available for runtime
 COPY package*.json ./
-RUN npm ci --omit=dev && npm cache clean --force
+RUN npm install --legacy-peer-deps && npm cache clean --force
 
 # Copy compiled frontend dist and server files
 COPY --from=builder /app/dist ./dist

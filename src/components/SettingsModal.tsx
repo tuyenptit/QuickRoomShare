@@ -8,9 +8,10 @@ interface SettingsModalProps {
   roomId: string;
   hasPassword: boolean;
   ttlHours: number;
+  expiresAt?: number | null;
   totalStorageUsed: number;
   fileCount: number;
-  onSaveSettings: (settings: { password?: string; removePassword?: boolean; ttlHours?: number }) => Promise<void>;
+  onSaveSettings: (settings: { password?: string; removePassword?: boolean; ttlHours?: number; expiresIn?: string }) => Promise<void>;
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -19,11 +20,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   roomId,
   hasPassword,
   ttlHours,
+  expiresAt,
   totalStorageUsed,
   fileCount,
   onSaveSettings,
 }) => {
   const [selectedTtl, setSelectedTtl] = useState<number>(ttlHours || 24);
+  const [selectedExpire, setSelectedExpire] = useState<string>('24h');
   const [newPassword, setNewPassword] = useState<string>('');
   const [removePass, setRemovePass] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -38,6 +41,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     try {
       await onSaveSettings({
         ttlHours: selectedTtl,
+        expiresIn: selectedExpire,
         password: newPassword.trim() ? newPassword.trim() : undefined,
         removePassword: removePass,
       });
@@ -84,21 +88,32 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           <div>
             <label className="flex items-center gap-2 text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-2">
               <Clock className="w-4 h-4 text-indigo-500" />
-              <span>Thời gian tự hủy dữ liệu phòng (TTL)</span>
+              <span>Thời gian tự hủy dữ liệu phòng (Self-destruct)</span>
             </label>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {expiresAt && expiresAt > Date.now() && (
+              <div className="p-2 mb-2 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-900/40 text-[11px] text-amber-800 dark:text-amber-300 flex items-center justify-between">
+                <span>Thời hạn hiện tại:</span>
+                <span className="font-semibold">{new Date(expiresAt).toLocaleTimeString('vi-VN')} {new Date(expiresAt).toLocaleDateString('vi-VN')}</span>
+              </div>
+            )}
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5">
               {[
-                { label: '1 Giờ', value: 1 },
-                { label: '6 Giờ', value: 6 },
-                { label: '24 Giờ', value: 24 },
-                { label: 'Không hủy', value: 0 },
+                { label: '1 Giờ', value: '1h', num: 1 },
+                { label: '12 Giờ', value: '12h', num: 12 },
+                { label: '24 Giờ', value: '24h', num: 24 },
+                { label: '3 Ngày', value: '3d', num: 72 },
+                { label: '7 Ngày', value: '7d', num: 168 },
+                { label: 'Không hủy', value: 'never', num: 0 },
               ].map((opt) => (
                 <button
                   type="button"
                   key={opt.value}
-                  onClick={() => setSelectedTtl(opt.value)}
-                  className={`py-2 px-3 text-xs font-medium rounded-xl border text-center transition-all ${
-                    selectedTtl === opt.value
+                  onClick={() => {
+                    setSelectedExpire(opt.value);
+                    setSelectedTtl(opt.num);
+                  }}
+                  className={`py-2 px-1.5 text-[11px] font-medium rounded-xl border text-center transition-all ${
+                    selectedExpire === opt.value
                       ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 font-semibold shadow-xs'
                       : 'border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-800/40 text-neutral-600 dark:text-neutral-400 hover:border-neutral-300'
                   }`}
@@ -108,9 +123,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               ))}
             </div>
             <p className="mt-1.5 text-[11px] text-neutral-500 dark:text-neutral-400">
-              {selectedTtl === 0
+              {selectedExpire === 'never'
                 ? 'Dữ liệu được lưu trữ cho đến khi bạn bấm nút "Xóa phòng".'
-                : `Dữ liệu và file sẽ tự động xóa sau ${selectedTtl} giờ kể từ lần sửa cuối.`}
+                : `Dữ liệu và file sẽ tự động bị xóa và hủy phòng vĩnh viễn theo thời hạn đã chọn.`}
             </p>
           </div>
 

@@ -13,6 +13,7 @@ import {
   removeRecentRoom,
   getThemePreference,
   setThemePreference,
+  clearStoredPassword,
 } from './utils/storage.ts';
 
 interface HeaderActionSet {
@@ -47,12 +48,12 @@ export default function App() {
     const hash = window.location.hash;
     const searchParams = new URLSearchParams(window.location.search);
 
-    const pathMatch = pathname.match(/^\/room\/([a-zA-Z0-9_-]+)/i);
+    const pathMatch = pathname.match(/^\/rooms?\/([a-zA-Z0-9_-]+)/i);
     if (pathMatch && pathMatch[1]) {
       return pathMatch[1].toLowerCase();
     }
 
-    const hashMatch = hash.match(/^#\/?(?:room\/)?([a-zA-Z0-9_-]+)/i);
+    const hashMatch = hash.match(/^#\/?(?:rooms?\/)?([a-zA-Z0-9_-]+)/i);
     if (hashMatch && hashMatch[1]) {
       return hashMatch[1].toLowerCase();
     }
@@ -93,6 +94,9 @@ export default function App() {
   };
 
   const handleGoHome = () => {
+    if (currentRoomId) {
+      clearStoredPassword(currentRoomId);
+    }
     window.history.pushState({}, '', '/');
     setCurrentRoomId(null);
     setHeaderActions({});

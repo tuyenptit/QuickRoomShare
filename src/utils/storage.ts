@@ -2,7 +2,7 @@ import { RecentRoom } from '../types.ts';
 
 const RECENT_ROOMS_KEY = 'quickroom_recent_rooms';
 const THEME_KEY = 'quickroom_theme';
-const PASSWORDS_KEY = 'quickroom_passwords';
+const PASSWORDS_KEY = 'quickroom_session_passwords';
 
 export function getRecentRooms(): RecentRoom[] {
   try {
@@ -40,7 +40,9 @@ export function removeRecentRoom(id: string) {
 
 export function getStoredPassword(roomId: string): string | null {
   try {
-    const raw = localStorage.getItem(PASSWORDS_KEY);
+    const direct = sessionStorage.getItem(`room_pass_${roomId}`);
+    if (direct) return direct;
+    const raw = sessionStorage.getItem(PASSWORDS_KEY);
     const map = raw ? JSON.parse(raw) : {};
     return map[roomId] || null;
   } catch {
@@ -50,10 +52,11 @@ export function getStoredPassword(roomId: string): string | null {
 
 export function saveStoredPassword(roomId: string, password: string) {
   try {
-    const raw = localStorage.getItem(PASSWORDS_KEY);
+    sessionStorage.setItem(`room_pass_${roomId}`, password);
+    const raw = sessionStorage.getItem(PASSWORDS_KEY);
     const map = raw ? JSON.parse(raw) : {};
     map[roomId] = password;
-    localStorage.setItem(PASSWORDS_KEY, JSON.stringify(map));
+    sessionStorage.setItem(PASSWORDS_KEY, JSON.stringify(map));
   } catch (e) {
     console.error('Failed to store password', e);
   }
@@ -61,10 +64,12 @@ export function saveStoredPassword(roomId: string, password: string) {
 
 export function clearStoredPassword(roomId: string) {
   try {
-    const raw = localStorage.getItem(PASSWORDS_KEY);
+    sessionStorage.removeItem(`room_pass_${roomId}`);
+    const raw = sessionStorage.getItem(PASSWORDS_KEY);
     const map = raw ? JSON.parse(raw) : {};
     delete map[roomId];
-    localStorage.setItem(PASSWORDS_KEY, JSON.stringify(map));
+    sessionStorage.setItem(PASSWORDS_KEY, JSON.stringify(map));
+    localStorage.removeItem('quickroom_passwords');
   } catch (e) {
     console.error('Failed to clear stored password', e);
   }

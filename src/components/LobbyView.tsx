@@ -6,8 +6,8 @@ import {
   Lock,
 } from 'lucide-react';
 import { RecentRoom } from '../types.ts';
-import { saveStoredPassword } from '../utils/storage.ts';
 import { RecentRooms } from './RecentRooms.tsx';
+import { saveStoredPassword } from '../utils/storage.ts';
 
 interface LobbyViewProps {
   onJoinRoom: (roomId: string, optionalPassword?: string) => void;
@@ -25,7 +25,7 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
   const [showPassField, setShowPassField] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleJoin = (e: React.FormEvent) => {
+  const handleJoin = async (e: React.FormEvent) => {
     e.preventDefault();
     const cleanId = roomIdInput.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '');
     if (!cleanId) {
@@ -33,15 +33,52 @@ export const LobbyView: React.FC<LobbyViewProps> = ({
       return;
     }
 
-    if (optionalPassword.trim()) {
-      saveStoredPassword(cleanId, optionalPassword.trim());
+    const pass = optionalPassword.trim();
+
+    try {
+      await fetch('/api/rooms', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          roomId: cleanId,
+          password: pass || undefined,
+        }),
+      });
+    } catch (err) {
+      console.error('Failed to create room with options:', err);
     }
 
-    onJoinRoom(cleanId, optionalPassword.trim() || undefined);
+    // YÊU CẦU 1: Lưu tạm mật khẩu vào sessionStorage khi tạo phòng có pass
+    if (pass) {
+      sessionStorage.setItem(`room_pass_${cleanId}`, pass);
+      saveStoredPassword(cleanId, pass);
+    }
+
+    onJoinRoom(cleanId);
   };
 
-  const handleCreateRandomPin = () => {
+  const handleCreateRandomPin = async () => {
     const pin = Math.floor(100000 + Math.random() * 900000).toString();
+    const pass = optionalPassword.trim();
+    try {
+      await fetch('/api/rooms', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          roomId: pin,
+          password: pass || undefined,
+        }),
+      });
+    } catch (err) {
+      console.error('Failed to create random pin room:', err);
+    }
+
+    // YÊU CẦU 1: Lưu tạm mật khẩu vào sessionStorage khi tạo phòng có pass
+    if (pass) {
+      sessionStorage.setItem(`room_pass_${pin}`, pass);
+      saveStoredPassword(pin, pass);
+    }
+
     onJoinRoom(pin);
   };
 
